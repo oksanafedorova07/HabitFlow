@@ -6,18 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('habits', '0001_initial'),
+        ("habits", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='habit',
-            name='days_of_week',
-            field=models.CharField(blank=True, max_length=13, verbose_name='Дни недели (через запятую, 0=Пн,6=Вс)'),
+            model_name="habit",
+            name="days_of_week",
+            field=models.CharField(
+                blank=True,
+                max_length=13,
+                verbose_name="Дни недели (через запятую, 0=Пн,6=Вс)",
+            ),
         ),
         migrations.AddField(
-            model_name='habit',
-            name='is_active',
-            field=models.BooleanField(default=True, verbose_name='Активна'),
+            model_name="habit",
+            name="is_active",
+            field=models.BooleanField(default=True, verbose_name="Активна"),
         ),
     ]
