@@ -7,7 +7,7 @@ on:
 
 jobs:
   ci:
-    name: Run Tests and Linting
+    name: 🔍 Run Tests and Linting
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -27,7 +27,7 @@ jobs:
         run: |
           flake8 . --exclude=env,migrations,__pycache__
 
-      - name: Запустить тесты
+      - name: 🧪 Запустить тесты
         run: |
           python manage.py test --settings=config.settings
         env:
@@ -44,9 +44,9 @@ jobs:
       postgres:
         image: postgres:15
         env:
-           POSTGRES_DB: habitflow_db
-           POSTGRES_USER: postgres
-           POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: habitflow_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
         options: >-
@@ -55,12 +55,12 @@ jobs:
           --health-timeout=5s
           --health-retries=5
       redis:
-        image: redis:7
-        ports:
-          - 6379:6379
+       image: redis:7
+       ports:
+         - 6379:6379
 
   build:
-    name: Build Docker Images
+    name: 🐳 Build Docker Images
     runs-on: ubuntu-latest
     needs: ci
     steps:
@@ -79,7 +79,7 @@ jobs:
           docker build --target celery -t myapp-celery:latest .
 
   deploy:
-    name: Deploy to Production Server
+    name: 🚀 Deploy to Production Server
     runs-on: ubuntu-latest
     needs: [ci, build]
     if: success()
@@ -88,7 +88,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure SSH
+      - name: 🔑 Configure SSH Agent
         uses: webfactory/ssh-agent@v0.5.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -101,7 +101,23 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd /home/${{ secrets.SSH_USERNAME }}/habitflow || exit
+            # Перейти в домашнюю папку
+            cd /home/${{ secrets.SSH_USERNAME }} || exit
+
+            # Создать папку habitflow и клонировать репозиторий, если нужно
+            if [ ! -d "habitflow" ]; then
+              echo "📁 Папка habitflow не найдена. Клонирую репозиторий..."
+              git clone https://github.com/oksanafedorova07/HabitFlow.git habitflow
+            fi
+
+            cd habitflow || exit
+
+            # Убедиться, что нужная ветка существует
+            git fetch origin work/final-work_9
+
+            # Переключиться на ветку и обновиться
+            git checkout work/final-work_9
+            git pull origin work/final-work_9
 
             # Обновить .env из секретов
             cat > .env << EOF
@@ -116,17 +132,19 @@ jobs:
             CELERY_BROKER_URL=redis://redis:6379/0
             EOF
 
-            # Обновить docker-compose.yml
-            curl -o docker-compose.yml https://raw.githubusercontent.com/oksanafedorova07/HabitFlow/work/final-work_9/docker-compose.yml
-
             # Перезапустить сервисы
+            echo "🔄 Останавливаю контейнеры..."
             docker-compose down
+
+            echo "🏗️ Пересобираю и запускаю контейнеры..."
             docker-compose up -d --build
 
             # Применить миграции
-            docker-compose run backend python manage.py migrate --noinput
+            echo "🗄️ Применяю миграции..."
+            docker-compose run --rm backend python manage.py migrate --noinput
 
             # Собрать статику
-            docker-compose run backend python manage.py collectstatic --noinput
+            echo "📦 Собираю статику..."
+            docker-compose run --rm backend python manage.py collectstatic --noinput
 
-            echo "✅ Деплой завершён!"
+            echo "✅ Деплой завершён успешно!"
