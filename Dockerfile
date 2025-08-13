@@ -60,3 +60,8 @@ RUN rm -f /tmp/.build-env
 # Команда по умолчанию
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
 
+# Стадия: celery
+FROM backend as celery
+
+# Celery worker запускается с этой командой
+CMD ["celery", "-A", "config", "worker", "-l", "info"]
