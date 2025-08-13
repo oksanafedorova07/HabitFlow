@@ -140,4 +140,4 @@ CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", default=True)
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
 
 # Telegram
-TELEGRAM_BOT_TOKEN = env.str("TELEGRAM_BOT_TOKEN")
+TELEGRAM_BOT_TOKEN = env.str("TELEGRAM_BOT_TOKEN", default="test_token_for_ci_123456:ABCdefGhiJKLmnoPQR")
