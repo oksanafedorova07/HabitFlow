@@ -38,9 +38,11 @@ def check_and_send_habit_reminders():
             user_profile = getattr(habit.user, "profile", None)
             if user_profile and user_profile.telegram_id:
                 if habit.reward:
-                    msg = f"{habit.action} в {habit.place} ({habit.time.strftime('%H:%M')}). После выполнения: {habit.reward}"
+                    msg = (f"{habit.action} в {habit.place} ({habit.time.strftime('%H:%M')})."
+                           f" После выполнения: {habit.reward}")
                 elif habit.related_habit:
-                    msg = f"{habit.action} в {habit.place} ({habit.time.strftime('%H:%M')}). После выполнения: {habit.related_habit.action}"
+                    msg = (f"{habit.action} в {habit.place} ({habit.time.strftime('%H:%M')})."
+                           f" После выполнения: {habit.related_habit.action}")
                 else:
                     msg = f"Напоминание: {habit.action} в {habit.place} ({habit.time.strftime('%H:%M')})"
                 send_telegram_reminder.delay(user_profile.telegram_id, msg)
