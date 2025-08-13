@@ -26,15 +26,35 @@ jobs:
         run: |
           flake8 . --exclude=env,migrations,__pycache__
 
-      - name: Run tests
+      - name: 🧪 Запустить тесты
         env:
-          DJANGO_SETTINGS_MODULE: config.settings
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          DEBUG: ${{ secrets.DEBUG }}
+          SECRET_KEY: dummykey
+          DEBUG: "False"
+          DB_NAME: test_habitflow
+          DB_USER: postgres
+          DB_PASSWORD: postgres
           DB_HOST: localhost
-          DB_NAME: test_db
-          DB_USER: user
-          DB_PASSWORD: pass
+          DB_PORT: 5432
+          TELEGRAM_BOT_TOKEN: test_token
+          CELERY_BROKER_URL: redis://localhost:6379/0
+        services:
+          postgres:
+            image: postgres:15
+            env:
+              POSTGRES_DB: habitflow_db
+              POSTGRES_USER: postgres
+              POSTGRES_PASSWORD: postgres
+            ports:
+              - 5432:5432
+            options: >-
+              --health-cmd=pg_isready
+              --health-interval=10s
+              --health-timeout=5s
+              --health-retries=5
+          redis:
+            image: redis:7
+            ports:
+              - 6379:6379
         run: |
           python manage.py test --settings=config.settings
 
